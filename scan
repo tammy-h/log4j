@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Step 1: Scan the network
+hosts=$(nmap -p 514 --open -sV <network> | grep log4j | awk '{print $6}' | cut -d '/' -f 1)
+
+# Step 2: Retrieve the log4j configuration file for each host
+for host in $hosts; do
+  config_file=$(curl http://$host:8080/log4j.properties)
+  
+  # Step 3: Check for vulnerable configurations
+  if echo "$config_file" | grep -q "log4j.appender.socket.Port=4560"; then
+    echo "Vulnerable configuration found on $host"
+  
+done
